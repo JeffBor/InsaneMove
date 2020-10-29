@@ -1229,7 +1229,7 @@ Function EnsureCloudSite($srcUrl, $destUrl, $MySiteEmail) {
 			$cloud = Get-PnPTenantSite -Url $destUrl -ErrorAction SilentlyContinue
 		}
 	}
- catch {}
+ 	catch {}
 	if (!$cloud) {
 		Write-Host "- CREATING $destUrl"
 		
@@ -1249,7 +1249,7 @@ Function EnsureCloudSite($srcUrl, $destUrl, $MySiteEmail) {
 			Get-SPOSite $destUrl | Select-Object Storage* | Format-List
 		}
 	}
- else {
+ 	else {
 		Write-Host "- FOUND $destUrl"
 		if ($verifyWiki) {
 			Write-Host "- VERIFY WIKI $destUrl"
@@ -1539,41 +1539,41 @@ Function Main() {
 		UserProfileSetHybridURL
 		CompileAudiences
 	}
- elseif ($measure) {
+ 	elseif ($measure) {
 		# Populate CSV with size (GB)
 		NewLog
 		MeasureSiteCSV
 	}
- elseif ($readOnly) {
+ 	elseif ($readOnly) {
 		# Lock on-prem sites
 		NewLog
 		LockSite "ReadOnly"
 	}
- elseif ($readWrite) {
+ 	elseif ($readWrite) {
 		# Unlock on-prem sites
 		NewLog
 		LockSite "Unlock"
 	}
- elseif ($noAccess) {
+ 	elseif ($noAccess) {
 		# NoAccess on-prem sites
 		NewLog
 		LockSite "NoAccess"	
 	}
- elseif ($verifyCloudSites) {
+ 	elseif ($verifyCloudSites) {
 		# Create site collection
 		NewLog
 		ReadCloudPW
 		ConnectCloud
 		VerifyCloudSites
 	}
- elseif ($qualityAssurance) {
+ 	elseif ($qualityAssurance) {
 		# Run QA check
 		NewLog
 		ReadCloudPW
 		ConnectCloud
 		QualityAssurance | Out-Null
 	}
- else {
+	else {
 		if ($migrate) {
 			if (!$dryRun) {
 				# Prompt to verify
@@ -1647,4 +1647,5 @@ Function Main() {
 		catch {}
 	}
 }
+
 Main
