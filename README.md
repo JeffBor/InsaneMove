@@ -19,6 +19,7 @@ ShareGate offers “insane mode” which uploads to Azure blob storage for fast 
 * Creates “worker*X*.ps1” file on each server to run one copy job
 * Automatic queuing to start new jobs as current ones complete
 * Status report to CSV with ShareGate session ID#, errors, warnings, and error detail XML  (if applicable)
+* QA checking and reporting.
 * LOG for both “InsaneMove” centrally and each remote worker PS1
 
 ## Requirements
@@ -33,24 +34,164 @@ ShareGate offers “insane mode” which uploads to Azure blob storage for fast 
 
 1. Clone or Download `InsaneMove.zip` and extract
 1. Populate `wave.csv` with source/destination URLs
+1. Prepare the ShareGate user mapping file `\insanemove\usermap.sgum`
 1. Run `InsaneMove.ps1 -v wave.csv` to verify all destination site collection exists (and will create if missing)
 1. Run `InsaneMove.ps1 wave.csv` to begin copy jobs across remote servers
 1. Sit back and enjoy!
 
 ## Parameters
 
-* `[string]$fileCSV` > CSV list of source and destination SharePoint site URLs to copy to Office 365.
-* `-v[switch]$verifyCloudSites` > Verify all Office 365 site collections.  Prep step before real migration.
-* `-i[switch]$incremental` > Copy incremental changes only. <http://help.share-gate.com/article/443-incremental-copy-copy-sharepoint-content>
-* `-m[switch]$measure` > Measure size of site collections in GB.
-* `-e[switch]$email` > Send email notifications with summary of migration batch progress.
-* `-ro[switch]$readOnly` > Lock sites read-only.
-* `-rw[switch]$readWrite` > Unlock sites read-write.
-* `-sca[switch]$siteCollectionAdmin` > Grant Site Collection Admin rights to the migration user specified in XML settings file.
+    -fileCSV <String>
+    CSV list of source and destination SharePoint site URLs to copy to Office 365.
+        Required?                    false
+        Position?                    1
+        Default value
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -verifyCloudSites [<SwitchParameter>]
+    Verify all Office 365 site collections.  Prep step before real migration.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -verifyWiki [<SwitchParameter>]
+    Verify Wiki Libraries exist on Office 365 sites.  After site collections created OK (-verify).
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -incremental [<SwitchParameter>]
+    Copy incremental changes only. http://help.share-gate.com/article/443-incremental-copy-copy-sharepoint-content
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -measure [<SwitchParameter>]
+    Measure size of site collections in GB.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -readOnly [<SwitchParameter>]
+    Lock sites read-only.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -readWrite [<SwitchParameter>]
+    Unlock sites read-write.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -noAccess [<SwitchParameter>]
+    Lock sites no access.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -userProfile [<SwitchParameter>]
+    Update local User Profile Service with cloud personal URL.  Helps with Hybrid Onedrive audience rules.  Need to recompile audiences after running this.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -dryRun [<SwitchParameter>]
+    Dry run replaces core "Copy-Site" with "NoCopy-Site" to execute all queueing but not transfer any data.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -clean [<SwitchParameter>]
+    Clean servers to prepare for next migration batch.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -deleteSource [<SwitchParameter>]
+    Delete source SharePoint sites on-premise.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -deleteDest [<SwitchParameter>]
+    Delete destination SharePoint sites in cloud
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -qualityAssurance [<SwitchParameter>]
+    Compare source and destination lists for QA check.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -migrate [<SwitchParameter>]
+    Copy sites to Office 365.  This is the default method.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -whatif [<SwitchParameter>]
+    Pre-Migration Report.  Runs Copy-Site with -WhatIf.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -mini [<SwitchParameter>]
+    Leverage different narrow set of servers. MINI line from XML input file.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    -prepSource [<SwitchParameter>]
+    Prep source by Allow Multi Response on Survey and Update URL metadata fields with "rootfolder" on the source.  Replace with O365 compatible shorter URL.
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Screenshots
-
-![image](https://raw.githubusercontent.com/spjeff/InsaneMove/master/doc/rocket.png)
 
 ![image](https://raw.githubusercontent.com/spjeff/InsaneMove/master/doc/diagram.png)
 
