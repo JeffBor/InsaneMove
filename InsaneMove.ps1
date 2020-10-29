@@ -1243,7 +1243,7 @@ Function EnsureCloudSite($srcUrl, $destUrl, $MySiteEmail) {
 
 			# Create site
 			Write-Host "Creating site collection $destUrl"
-			New-PnPTenantSite -Owner $upn -Url $destUrl -Title $title -TimeZone 10
+			New-PnPTenantSite -Owner $upn -Url $destUrl -Title $title -TimeZone $settings.settings.tenant.timezoneId
 
 			# Display storage
 			Get-SPOSite $destUrl | Select-Object Storage* | Format-List

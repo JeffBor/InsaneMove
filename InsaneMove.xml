@@ -8,6 +8,7 @@
 		<suffix>tenant.onmicrosoft.com</suffix>
 		<uploadUsers>spmigrate1@tenant.onmicrosoft.com,spmigrate2@tenant.onmicrosoft.com,spmigrate3@tenant.onmicrosoft.com,spmigrate4@tenant.onmicrosoft.com,spmigrate5@tenant.onmicrosoft.com,spmigrate6@tenant.onmicrosoft.com,spmigrate7@tenant.onmicrosoft.com,spmigrate8@tenant.onmicrosoft.com,spmigrate9@tenant.onmicrosoft.com,spmigrate10@tenant.onmicrosoft.com,spmigrate11@tenant.onmicrosoft.com,spmigrate12@tenant.onmicrosoft.com</uploadUsers>
 		<uploadPass>pass@word1</uploadPass>
+		<timezoneId>11</timezoneId>
 	</tenant>
 	<maxWorker>1</maxWorker>
 	<notify>
