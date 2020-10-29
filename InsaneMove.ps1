@@ -990,10 +990,10 @@ Function FindCloudMySite ($MySiteEmail) {
 	# Lookup /personal/ site URL based on User Principal Name (UPN)
 	$coll = @()
 	$coll += $MySiteEmail
-	$profile = Get-PnPUserProfileProperty -Account $coll
-	if ($profile) {
-		if ($profile.PersonalUrl) {
-			$url = $profile.PersonalUrl.TrimEnd('/')
+	$UserProfile = Get-PnPUserProfileProperty -Account $coll
+	if ($UserProfile) {
+		if ($UserProfile.PersonalUrl) {
+			$url = $UserProfile.PersonalUrl.TrimEnd('/')
 		}
 	}
 	Write-Host "SEARCH for $MySiteEmail found URL $url" -Fore Yellow
