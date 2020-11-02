@@ -440,7 +440,11 @@ Function LongUrlFix() {
 								$after = ($newurl[0].split("/")[0..2] -join "/") + ($newurl -match 'RootFolder').split("=")[-1]
 
 								# Managed Path
-								$after = $after.replace('/490-sites/', '/sites/490-').replace('/ba_d-sites/', '/sites/ba_d-').replace('/cei-sites/', '/sites/cei-').replace('/comm-sites/', '/sites/comm-').replace('/corpadmin-sites/', '/sites/corpadmin-').replace('/dro-sites/', '/sites/dro-').replace('/dw-sites/', '/sites/dw-').replace('/ebusiness-sites/', '/sites/ebusiness-').replace('/entops-sites/', '/sites/entops-').replace('/eso-sites/', '/sites/eso-').replace('/exec-sites/', '/sites/exec-').replace('/finance-sites/', '/sites/finance-').replace('/hcd-sites/', '/sites/hcd-').replace('/hr-sites/', '/sites/hr-').replace('/lawpolicy-sites/', '/sites/lawpolicy-').replace('/portfolio-sites/', '/sites/portfolio-').replace('/ro-sites/', '/sites/ro-').replace('/sfmb-sites/', '/sites/sfmb-').replace('/sox-sites/', '/sites/sox-')
+								$after = $after.replace(
+									'/100-sites/', '/sites/100-'
+									).replace('/a-sites/', '/sites/a-'
+									).replace('/c-sites/', '/sites/c-'
+									)
 
 								# After
 								Write-Host $after -Fore Green
