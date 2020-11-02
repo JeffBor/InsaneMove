@@ -873,7 +873,7 @@ Function ExecuteSiteCopy($row, $worker) {
 		# MySite /personal/
 		$destUrl = $row.DestinationURL
 	}
- else {
+ 	else {
 		# Team /sites/
 		$destUrl = FormatCloudMP $row.DestinationURL
 	}
@@ -958,7 +958,7 @@ Function ExecuteSiteCopy($row, $worker) {
 	`n`$csMysite = New-CopySettings -OnSiteObjectExists Merge -OnContentItemExists Rename;
 	`n`$csIncr = New-CopySettings -OnSiteObjectExists Merge -OnContentItemExists IncrementalUpdate;
 	`n`$m=Import-UserAndGroupMapping -Path ""D:\insanemove\usermap.sgum"";
-	`n`$result = Copy-Site -Site $copyparam `$src -DestinationSite `$dest -Subsites -MappingSettings `$m -Merge -InsaneMode -VersionLimit 50;
+	`n`$result = Copy-Site -Site $copyparam `$src -DestinationSite `$dest -Subsites -MappingSettings `$m -Merge -InsaneMode;
 	`n`$result | Export-Clixml ""D:\insanemove\worker$wid-$runAsUser.xml"" -Force;`n} else {`n""URLs don't match""`n}
 	`nStop-Transcript"
 
