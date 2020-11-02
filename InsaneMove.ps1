@@ -343,7 +343,7 @@ Function EmailQACSV($file) {
 	$attach += $file
 
 	# Attach CSV and send
-	Send-MailMessage -SmtpServer $smtpServer -From $from -To $to -Subject "$file" -Body "Attached CSV" -Attachments $attach -BodyAsHtml
+	Send-MailMessage -SmtpServer $smtpServer -From $from -To $to -Subject "Migration: QA $file" -Body "See attached CSV." -Attachments $attach -BodyAsHtml
 }
 
 Function QualityAssurance() {
@@ -1144,7 +1144,7 @@ Function EmailSummary ($style) {
 	# Send message
 	if ($smtpServer -and $to -and $from) {
 		$summary = $grp | Select-Object Count, Name | Sort-Object Name | Out-String
-		Send-MailMessage -SmtpServer $smtpServer -From $from -To $to -Subject "Copy Site ($prct %) - ETA $eta - $name" -Body "$summary <br/> $wip" -BodyAsHtml
+		Send-MailMessage -SmtpServer $smtpServer -From $from -To $to -Subject "Migration: Summary ($prct %) - ETA $eta - $name" -Body "$summary <br/> $wip" -BodyAsHtml
 	}
 }
 
