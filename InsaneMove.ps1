@@ -433,7 +433,7 @@ Function LongUrlFix() {
 							$before = New-Object Microsoft.SharePoint.SPFieldUrlValue($item[$f.InternalName])
 							$url = $before.URL
 							$desc = $before.Description
-							if (($url.length -gt 240) -and ($url -match "http://sharepoint") -and ($url -match "rootfolder")) {
+							if (($url.length -gt 400) -and ($url -match "http://sharepoint") -and ($url -match "rootfolder")) {
 								# Before
 								Write-Host $url -Fore Yellow
 								$newurl = ([System.Web.HttpUtility]::UrlDecode($url)).Trim().split("?&")
