@@ -1,75 +1,141 @@
 ﻿<#
 .SYNOPSIS
-	Insane Move - Copy sites to Office 365 in parallel.  ShareGate Insane Mode times ten!
+	InsaneMove - Copy sites to Microsoft 365 in parallel.  ShareGate Insane Mode times ten!
 .DESCRIPTION
-	Copy SharePoint site collections to Office 365 in parallel.  CSV input list of source/destination URLs.  XML with general preferences.
+	Copy SharePoint site collections to Microsoft 365 in parallel.  CSV input list of source/destination URLs.  XML with general preferences.
+.PARAMETER fileCSV,
+	CSV list of source and destination SharePoint site URLs to copy to Microsoft 365.
+.PARAMETER verifyCloudSites,
+	Verify all Microsoft 365 site collections.  Prep step before real migration.
+	[Alias("v")]
+.PARAMETER verifyWiki,
+	Verify Wiki Libraries exist on Microsoft 365 sites.  After site collections created OK (-verify).
+.PARAMETER incremental
+	Copy incremental changes only. http://help.share-gate.com/article/443-incremental-copy-copy-sharepoint-content
+	[Alias("i")]
+.PARAMETER measure
+	Measure size of site collections in GB.
+	[Alias("m")]
+.PARAMETER readOnly
+	Lock sites read-only.
+	[Alias("ro")]
+.PARAMETER readWrite
+	Unlock sites read-write.
+	[Alias("rw")]
+.PARAMETER noAccess
+	Lock sites no access.
+	[Alias("na")]
+.PARAMETER userProfile
+	Update local User Profile Service with cloud personal URL.  Helps with Hybrid Onedrive audience rules.  Need to recompile audiences after running this.
+	[Alias("ups")]
+.PARAMETER dryRun
+	Dry run replaces core "Copy-Site" with "NoCopy-Site" to execute all queueing but not transfer any data.
+	[Alias("d")]
+.PARAMETER clean
+	Clean servers to prepare for next migration batch.
+	[Alias("c")]
+.PARAMETER deleteSource
+	Delete source SharePoint sites on-premise.
+	[Alias("ds")]
+.PARAMETER deleteDest
+	Delete destination SharePoint sites in cloud.
+	[Alias("dd")]
+.PARAMETER qualityAssurance
+	Compare source and destination lists for QA check.
+	[Alias("qa")]
+.PARAMETER migrate
+	Copy sites to Microsoft 365.  Main "default" method.
+.PARAMETER whatif	
+	Pre-Migration Report.  Runs Copy-Site with -WhatIf
+.PARAMETER Mini
+	Leverage different narrow set of servers using MINI line from XML input file.
+.PARAMETER prepSource
+	Prep source by Allow Multi Response on Survey and Update URL metadata fields with "rootfolder" on the source.  Replace with M365-compatible shorter URL.
+.EXAMPLE
+	.\InsaneMove.ps1 -v MyWave.csv
+	Verify all Microsoft 365 site collections.  Prep step before real migration.
+.EXAMPLE
+	.\InsaneMove.ps1 Mywave.csv
+	Copy sites to Microsoft 365.  Main method.
+.INPUTS
+	Comma-delimited file (CSV).  See PARAMETER fileCSV.
+.OUTPUTS
+	Varies by parameter but often generates log/report of activities.
+.NOTES
+	See Readme.md for notes and full coverage.
+.COMPONENT
+	Migration Automation
+.ROLE
+	Migration
+.FUNCTIONALITY
+	Microsoft 365 Migration
 #>
 
 [CmdletBinding()]param (
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'CSV list of source and destination SharePoint site URLs to copy to Office 365.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[string]$fileCSV,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Verify all Office 365 site collections.  Prep step before real migration.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("v")]
 	[switch]$verifyCloudSites = $false,
 
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Verify Wiki Libraries exist on Office 365 sites.  After site collections created OK (-verify).')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[switch]$verifyWiki = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Copy incremental changes only. http://help.share-gate.com/article/443-incremental-copy-copy-sharepoint-content')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("i")]
 	[switch]$incremental = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Measure size of site collections in GB.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("m")]
 	[switch]$measure = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Lock sites read-only.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("ro")]
 	[switch]$readOnly = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Unlock sites read-write.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("rw")]
 	[switch]$readWrite = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Lock sites no access.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("na")]
 	[switch]$noAccess = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Update local User Profile Service with cloud personal URL.  Helps with Hybrid Onedrive audience rules.  Need to recompile audiences after running this.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("ups")]
 	[switch]$userProfile = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Dry run replaces core "Copy-Site" with "NoCopy-Site" to execute all queueing but not transfer any data.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("d")]
 	[switch]$dryRun = $false,
 
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Clean servers to prepare for next migration batch.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("c")]
 	[switch]$clean = $false,
 
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Delete source SharePoint sites on-premise.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("ds")]
 	[switch]$deleteSource = $false,
 
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Delete destination SharePoint sites in cloud.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("dd")]
 	[switch]$deleteDest = $false,
 
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Compare source and destination lists for QA check.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[Alias("qa")]
 	[switch]$qualityAssurance = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Copy sites to Office 365.  Main method.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[switch]$migrate = $false,
 	
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Pre-Migration Report.  Runs Copy-Site with -WhatIf')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[switch]$whatif = $false,	
 		
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Leverage different narrow set of servers. MINI line from XML input file.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[switch]$mini = $false,
 
-	[Parameter(Mandatory = $false, ValueFromPipeline = $false, HelpMessage = 'Prep source by Allow Multi Response on Survey and Update URL metadata fields with "rootfolder" on the source.  Replace with O365 compatible shorter URL.')]
+	[Parameter(Mandatory = $false, ValueFromPipeline = $false)]
 	[switch]$prepSource = $false
 )
 
@@ -373,7 +439,7 @@ Function QualityAssurance() {
 
 		# Get on-premise site lists
 		$srcLists = InspectSource $s.SourceURL
-		# Get O365 site lists
+		# Get M365 site lists
 		$destLists = InspectDestination $s.DestinationURL
 		
 		# Compare source/destination
@@ -599,7 +665,7 @@ Function ReadCloudPW() {
 		$global:cloudPW = $settings.settings.tenant.adminPass
 	}
  else {
-		$global:cloudPW = Read-Host "Enter O365 Cloud Password for $($settings.settings.tenant.adminUser)"
+		$global:cloudPW = Read-Host "Enter M365 Cloud Password for $($settings.settings.tenant.adminUser)"
 	}
 }
 
@@ -939,7 +1005,7 @@ Function ExecuteSiteCopy($row, $worker) {
 		# MySite /personal/ = always RENAME
 		$copyparam = "-CopySettings `$csMysite"
 
-		# Set Version History before migration (ShareGate will copy setting to O365)
+		# Set Version History before migration (ShareGate will copy setting to M365)
 		Write-Host "Set Version History 99" -Fore Green
 		$site = Get-SPSite $srcUrl
 		$docLib = $site.RootWeb.Lists["Documents"]
@@ -1014,7 +1080,7 @@ Function SaveMigrationCSV() {
 Function CopySites() {
 	"<CopySites>"
 	# Monitor and Run loop
-	Write-Host "===== Start Site Copy to O365 ===== $(Get-Date)" -Fore Yellow
+	Write-Host "===== Start Site Copy to M365 ===== $(Get-Date)" -Fore Yellow
 	CreateTracker
 	
 	# Safety
@@ -1121,7 +1187,7 @@ Function CopySites() {
 	} while ($remain)
 	
 	# Complete
-	Write-Host "===== Finish Site Copy to O365 ===== $(Get-Date)" -Fore Yellow
+	Write-Host "===== Finish Site Copy to M365 ===== $(Get-Date)" -Fore Yellow
 	"[TRACK]"
 	$global:track | Group-Object status | Format-Table -a
 	$global:track | Select-Object CsvID, JobID, SessionID, SGSessionId, PC, RunAsUser, SourceURL, DestinationURL | Format-Table -a
@@ -1151,7 +1217,7 @@ Function EmailSummary ($style) {
 Function VerifyCloudSites() {
 	"<VerifyCloudSites>"
 	# Read CSV and ensure cloud sites exists for each row
-	Write-Host "===== Verify Site Collections exist in O365 ===== $(Get-Date)" -Fore Yellow
+	Write-Host "===== Verify Site Collections exist in M365 ===== $(Get-Date)" -Fore Yellow
 	$global:collMySiteEmail = @()
 
 	
@@ -1219,7 +1285,7 @@ Function BulkCreateMysite ($batch) {
 
 Function EnsureCloudSite($srcUrl, $destUrl, $MySiteEmail) {
 	"<EnsureCloudSite>"
-	# Create site in O365 if does not exist
+	# Create site in M365 if does not exist
 	$destUrl = FormatCloudMP $destUrl
 	Write-Host $destUrl -Fore Yellow
 	$srcUrl
@@ -1287,7 +1353,7 @@ Function EnsureCloudSite($srcUrl, $destUrl, $MySiteEmail) {
 }
 
 Function FormatCloudMP($url) {
-	# Replace Managed Path with O365 /sites/ only
+	# Replace Managed Path with M365 /sites/ only
 	if (!$url) { return }
 	$managedPath = "sites"
 	$i = $url.Indexof("://") + 3
@@ -1621,9 +1687,9 @@ Function Main() {
 			Write-Host "InsaneMove - USAGE" -Fore Yellow
 			Write-Host "==================" -Fore Yellow
 			Write-Host @"
--verifyCloudSites (-v)		Verify all Office 365 site collections.  Prep step before real migration.
--migrate (-mig)			Copy sites to Office 365.  Main method.
--fileCSV (-csv)			CSV input list of source and destination SharePoint URLs to copy to Office 365.	
+-verifyCloudSites (-v)		Verify all Microsoft 365 site collections.  Prep step before real migration.
+-migrate (-mig)			Copy sites to Microsoft 365.  Main method.
+-fileCSV (-csv)			CSV input list of source and destination SharePoint URLs to copy to Microsoft 365.	
 
 -deleteSource (-ds)		Delete source SharePoint sites on-premise.
 -deleteDest (-dd)		Delete destination SharePoint sites in cloud.

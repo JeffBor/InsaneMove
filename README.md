@@ -178,7 +178,7 @@ ShareGate offers “insane mode” which uploads to Azure blob storage for fast 
         Accept wildcard characters?  false
 
     -prepSource [<SwitchParameter>]
-    Prep source by Allow Multi Response on Survey and Update URL metadata fields with "rootfolder" on the source.  Replace with O365 compatible shorter URL.
+    Prep source by Allow Multi Response on Survey and Update URL metadata fields with "rootfolder" on the source.  Replace with M365-compatible shorter URL.
         Required?                    false
         Position?                    named
         Default value                False
